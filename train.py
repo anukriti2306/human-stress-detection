@@ -5,8 +5,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
+from xgboost import XGBClassifier
 
-solver='liblinear'
 random_state=1
 output_file='model/final_model.bin'
 DATA_PATH='SaYoPillow.csv'
@@ -30,17 +30,23 @@ most_important_features = [
     'limb_movement',
     'sleeping_hours',
     'snoring_rate',
-    'body_temperature'
+    'body_temperature',
+    'eye_movement'
 ]
 df_train, df_val = train_test_split(df, test_size=0.4, random_state=random_state, stratify=df.stress_level)
 
 
 #training function
-def train(df_train, y_train,solver='liblinear', random_state=1):
+def train(df_train, y_train, random_state=1):
     dicts=df_train[most_important_features].to_dict(orient='records')
     dv=DictVectorizer(sparse=False)
     X_train=dv.fit_transform(dicts)
-    model=LogisticRegression(solver=solver, random_state=random_state)
+    model=XGBClassifier(
+        n_estimators=100,
+        max_depth=4,
+        learning_rate=0.1,
+        random_state=random_state
+    )
     model.fit(X_train, y_train)
     return dv, model
 def predict(df, dv, model):
@@ -50,7 +56,7 @@ def predict(df, dv, model):
     return y_pred
 
 print("Training the model...")
-dv, model = train(df_train, df_train.stress_level.values, solver, random_state)
+dv, model = train(df_train, df_train.stress_level.values, random_state)
 
 #Run prediction and evaluate
 print("Evaluating model...")

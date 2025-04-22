@@ -4,7 +4,14 @@ from flask import Flask, request, jsonify
 
 #loading the final model
 model_file='model/final_model.bin'
-
+#defining each stress level with a label
+stress_labels={
+    0:"Low/Normal(No stress)",
+    1:"Medium low(Mild stress)",
+    2:"Medium(Moderate stress)",
+    3:"Medium(Significant stress)",
+    4:"High(Concerning)"
+}
 with open(model_file, 'rb') as f_in:
     dv,model = pickle.load(f_in)
 
@@ -29,8 +36,13 @@ def predict():
     X = dv.transform([input_data])
     y_pred=model.predict(X)
 
-    #return the prediction
-    return jsonify({'stress_level': int(y_pred[0])})#fix
+    #return the prediction    
+    predicted_level=int(y_pred[0])
+    description= stress_labels.get(predicted_level, 'Unknown')
+    return jsonify({
+        'stress_level':predicted_level,
+        'description':description
+    })
 
 #running the server
 if __name__=='__main__':

@@ -48,8 +48,8 @@ if st.button("Predict Stress Level"):
         result=response.json()
 
         #display the prediction
-        #st.write("📦 Raw API response:", result)
-        st.success(f"✅Predicted Stress Level:{result['stress_level']}")
+        st.success(f"✅ Predicted Stress Level: {result['description']} (Level {result['stress_level']})")
+
     except Exception as e:
         st.error("Could not connect to the prediction server")
         st.error(f"Details:{e}")
