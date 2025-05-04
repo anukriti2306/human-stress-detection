@@ -1,5 +1,8 @@
 import streamlit as st
 import requests
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 # Flask API Endpoint
 API_URL = "http://127.0.0.1:5000/predict"
@@ -50,34 +53,95 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- Streamlit App Title ---
-st.title("Human Stress Detector")
-st.subheader("Based on Sleep Data")
+# --- Streamlit Sidebar Navigation ---
+st.sidebar.title("Navigation")
+section = st.sidebar.radio("Choose Section", ["Stress Prediction", "Visual Insights"])
 
-# --- Input Fields ---
-snoring_rate = st.number_input("Snoring Rate", min_value=0.0, max_value=100.0, step=0.1)
-body_temperature = st.number_input("Body Temperature (°C)", min_value=20.0, max_value=45.0, step=0.1)
-sleeping_hours = st.number_input("Sleeping Hours", min_value=0.0, max_value=24.0, step=0.1)
-heart_rate = st.number_input("Heart Rate", min_value=30.0, max_value=200.0, step=1.0)
+# --- Stress Prediction Section ---
+if section == "Stress Prediction":
+    st.title("Human Stress Detector")
+    st.subheader("Based on Sleep Data")
 
-# --- Predict Button ---
-if st.button("Predict Stress Level"):
-    payload = {
-        "heart_rate": heart_rate,
-        "sleeping_hours": sleeping_hours,
-        "snoring_rate": snoring_rate,
-        "body_temperature": body_temperature
-    }
+    # --- Input Fields ---
+    snoring_rate = st.number_input("Snoring Rate", min_value=0.0, max_value=100.0, step=0.1)
+    body_temperature = st.number_input("Body Temperature (°C)", min_value=20.0, max_value=45.0, step=0.1)
+    sleeping_hours = st.number_input("Sleeping Hours", min_value=0.0, max_value=24.0, step=0.1)
+    heart_rate = st.number_input("Heart Rate", min_value=30.0, max_value=200.0, step=1.0)
+
+    # --- Predict Button ---
+    if st.button("Predict Stress Level"):
+        payload = {
+            "heart_rate": heart_rate,
+            "sleeping_hours": sleeping_hours,
+            "snoring_rate": snoring_rate,
+            "body_temperature": body_temperature
+        }
+
+        try:
+            response = requests.post(API_URL, json=payload)
+            result = response.json()
+
+            if 'error' in result:
+                st.error(f"Error: {result['error']}")
+            else:
+                st.success(f"Predicted Stress Level: {result['description']} (Level {result['stress_level']})")
+
+        except Exception as e:
+            st.error("Could not connect to the prediction server.")
+            st.error(f"Details: {e}")
+
+# --- Data Visualization Section ---
+elif section == "Visual Insights":
+    st.markdown("---")
+    st.header("📊 Visual Insights from Sleep Data")
+
+    # Path to your global CSV file
+    csv_path = "stress_data.csv"  # Update this if needed
 
     try:
-        response = requests.post(API_URL, json=payload)
-        result = response.json()
+        df = pd.read_csv(csv_path)
 
-        if 'error' in result:
-            st.error(f"Error: {result['error']}")
-        else:
-            st.success(f"Predicted Stress Level: {result['description']} (Level {result['stress_level']})")
+        # Adjust stress levels to 1–5 if they start from 0
+        if df['stresslevel'].min() == 0:
+            df['stresslevel'] += 1
+
+        # List of features to analyze
+        features = ['heartrate', 'sleepinghours', 'snoring', 'bodytemperature']
+
+        # Create a new dataframe to hold the correlation values between features and stress level
+        correlation_data = df[features + ['stresslevel']]
+
+        # Compute the correlation matrix
+        correlation_matrix = correlation_data.corr()
+
+        # Plotting the heatmap
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(correlation_matrix, annot=True, cmap='coolwarm', fmt=".2f", linewidths=0.5)
+        plt.title("Correlation Heatmap of Features and Stress Level")
+
+        # Show the heatmap
+        st.pyplot(plt)
+
+        # Button to show line plots
+        if st.button("Logical Relation Behind Parameters"):
+            # Line plots for each feature
+            st.markdown("### Line Plots for Features vs Stress Level")
+
+            # Create a figure with subplots
+            fig, ax = plt.subplots(figsize=(10, 6))
+
+            sns.lineplot(data=df, x='sleepinghours', y='stresslevel', ax=ax, label='Sleeping Hours', color='blue')
+            sns.lineplot(data=df, x='heartrate', y='stresslevel', ax=ax, label='Heart Rate', color='green')
+            sns.lineplot(data=df, x='snoring', y='stresslevel', ax=ax, label='Snoring Rate', color='red')
+            sns.lineplot(data=df, x='bodytemperature', y='stresslevel', ax=ax, label='Body Temperature', color='purple')
+
+            ax.set_title("Line Plots: Features vs Stress Level")
+            ax.set_xlabel("Feature Values")
+            ax.set_ylabel("Stress Level")
+            ax.legend()
+
+            st.pyplot(fig)
 
     except Exception as e:
-        st.error("Could not connect to the prediction server.")
+        st.error("Could not load or plot data from the CSV.")
         st.error(f"Details: {e}")
