@@ -9,11 +9,11 @@ with open(model_file, 'rb') as f_in:
 
 # Labels
 stress_labels = {
-    0: "Low/Normal (No stress)",
-    1: "Medium low (Mild stress)",
-    2: "Medium (Moderate stress)",
-    3: "Medium (Significant stress)",
-    4: "High (Concerning)"
+    1: "Low/Normal (No stress)",
+    2: "Medium low (Mild stress)",
+    3: "Medium (Moderate stress)",
+    4: "Medium (Significant stress)",
+    5: "High (Concerning)"
 }
 
 # Features used in model
@@ -34,14 +34,15 @@ def predict():
         return jsonify({'error': f'Invalid input type: {e}'}), 400
 
     X_input = dv.transform([input_data])
-    y_pred = model.predict(X_input)
-    predicted_level = int(y_pred[0])
-    description = stress_labels.get(predicted_level, 'Unknown')
+    model_output = int(model.predict(X_input)[0])  # 0 to 4
+    user_friendly_level = model_output          # 1 to 5
+    description = stress_labels.get(model_output, 'Unknown')
 
     return jsonify({
-        'stress_level': predicted_level,
+        'stress_level': user_friendly_level,
         'description': description
     })
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
