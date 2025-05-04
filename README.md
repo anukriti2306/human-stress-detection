@@ -1,4 +1,4 @@
-Here's the modified README based on the `train.py` and the new CSV:
+
 
 ---
 
@@ -30,15 +30,15 @@ The dataset used for training the model includes the following features:
 | **Body Temperature** | Body temperature while sleeping (°C)            |
 | **Sleeping Hours**   | Total number of hours of sleep                  |
 | **Heart Rate**       | Heart rate during sleep (beats per minute)      |
-| **Stress Level**     | Detected stress level during sleep (0-4 scale)  |
+| **Stress Level**     | Detected stress level during sleep (1-5 scale)  |
 
 ### Stress Level Categories:
 
-* **0** – Low / Normal (No Stress)
-* **1** – Medium-Low (Mild Stress)
-* **2** – Medium (Moderate Stress)
-* **3** – Medium-High (Significant Stress)
-* **4** – High (Concerning Stress)
+* **1** – Low (No Stress)
+* **2** – Medium-Low (Mild Stress)
+* **3** – Medium (Moderate Stress)
+* **4** – Medium-High (Significant Stress)
+* **5** – High (Concerning Stress)
 
 ---
 
@@ -108,25 +108,25 @@ This will open the Streamlit app in your browser, where you can input data and g
 
 ## 💡 Example Input
 
-Here's an example of a **low stress** input for testing:
+Here's an example of a **medium stress** input for testing:
 
 ```json
 {
-  "heart_rate": 60.0,
-  "sleeping_hours": 8.0,
-  "snoring_rate": 5.0,
-  "body_temperature": 36.5
+  "heart_rate": 85.0,
+  "sleeping_hours": 6.5,
+  "snoring_rate": 15.0,
+  "body_temperature": 37.2
 }
 ```
 
 ### Expected Output:
 
-For low stress levels, the response should look like this:
+For medium stress levels, the response should look like this:
 
 ```json
 {
-  "stress_level": 0,
-  "description": "Low/Normal (No stress)"
+  "stress_level": 3,
+  "description": "Medium (Moderate Stress)"
 }
 ```
 
@@ -137,3 +137,4 @@ For low stress levels, the response should look like this:
 If you'd like to contribute to the project, feel free to fork the repository and make changes. Pull requests are always welcome!
 
 ---
+
