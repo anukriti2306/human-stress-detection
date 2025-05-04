@@ -136,4 +136,10 @@ For medium stress levels, the response should look like this:
 
 If you'd like to contribute to the project, feel free to fork the repository and make changes. Pull requests are always welcome!
 
+<<<<<<< HEAD
 ---
+=======
+---
+
+
+>>>>>>> 4367f722a5ab7b44d1b93255d17d54bf1534b477
